@@ -3,6 +3,7 @@ import HeroBanner from "@/Sections/Home/HerroBanner";
 import MostPopular from "@/Sections/Home/MostPopular";
 import ProductCards from "@/Sections/Home/ProductCards";
 import ProductDetailSection from "@/Sections/Home/ProductDetailSection";
+import ScrollSnapHero from "@/Sections/Home/ScrollSnapHero";
 import ShopByCollection from "@/Sections/Home/Shopbycollection";
 import TextSlider from "@/Sections/Home/TextSlider";
 
@@ -17,6 +18,7 @@ export default function HomePage() {
             <MostPopular/>
             <TextSlider/>
             <ProductDetailSection/>
+            <ScrollSnapHero/>
         </>
     )
 }
