@@ -66,7 +66,7 @@ export default function Navbar() {
               </span>
             </button>
             <div className="h-6 w-px bg-black"></div>
-            <button className="text-black hover:text-gray-900 px-4">
+            <button className="text-black hover:text-gray-900 pl-4">
               <User className="h-5.5 w-5.5" />
             </button>
           </div>

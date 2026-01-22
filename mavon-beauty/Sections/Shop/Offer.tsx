@@ -1,6 +1,6 @@
 export default function Offer() {
   return (
-    <div className="w-full h-75 overflow-hidden p-2">
+    <div className="w-full h-75 overflow-hidden">
       <div className="border-2 border-dashed border-gray-300 h-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
           <div className="bg-gray-50 flex items-center justify-center py-8 px-8 lg:py-8 h-full">
