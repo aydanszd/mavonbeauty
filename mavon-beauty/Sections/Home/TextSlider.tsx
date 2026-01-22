@@ -5,9 +5,7 @@ export default function TextSlider() {
         { text: "Shop Smarter, Save Bigger!", outlined: true },
         { text: "Step into Savings Paradise!", outlined: false },
     ];
-
     const repeatedMessages = [...messages, ...messages, ...messages, ...messages, ...messages, ...messages];
-
     return (
         <div className="w-full overflow-hidden bg-[#FFFBF3] h-32.5 flex items-center">
             <div className="flex animate-scroll items-center">
@@ -31,7 +29,6 @@ export default function TextSlider() {
                     </span>
                 ))}
             </div>
-
             <style jsx>{`
         @keyframes scroll {
         from {
@@ -41,13 +38,11 @@ export default function TextSlider() {
             transform: translateX(-33.333%);
         }
         }
-
         .animate-scroll {
         animation: scroll 30s linear infinite;
         display: flex;
         will-change: transform;
         }
-
         .animate-scroll:hover {
         animation-play-state: paused;
         }
