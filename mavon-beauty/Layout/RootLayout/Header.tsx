@@ -1,5 +1,6 @@
 import { Search, ShoppingCart, User, ChevronDown } from "lucide-react";
-import Link from 'next/link';
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <nav
