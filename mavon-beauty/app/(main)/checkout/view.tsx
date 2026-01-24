@@ -484,7 +484,7 @@ export default function CheckoutForm() {
               <button
                 onClick={handleSubmit(onSubmit)}
                 disabled={isProcessing}
-                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-4 rounded-full font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md flex items-center justify-center gap-2 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-linear-to-r from-emerald-500 to-teal-500 text-white py-4 rounded-full font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md flex items-center justify-center gap-2 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
                   <>

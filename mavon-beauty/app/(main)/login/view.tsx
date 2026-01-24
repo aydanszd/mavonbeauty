@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Lock, Mail, Eye, EyeOff, Shield, Sparkles } from "lucide-react";
+import { loginUser } from "@/service/authService";
+import { useRouter } from "next/navigation";
 
 export default function BeautyLogin() {
   const [showPassword, setShowPassword] = useState(false);
@@ -8,13 +10,42 @@ export default function BeautyLogin() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Reset error
+    setError("");
+
+    // Validation
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      const result = await loginUser({ email, password });
+
+      if (result.success) {
+        // Store remember me preference
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+        } else {
+          localStorage.removeItem("rememberMe");
+        }
+
+        // Redirect to dashboard or home page
+        router.push("/dashboard");
+      } else {
+        setError(result.message || "Login failed. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err.message || "An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-      alert("Login successful!");
-    }, 1500);
+    }
   };
 
   return (
@@ -33,6 +64,13 @@ export default function BeautyLogin() {
             <h2 className="text-2xl font-medium text-gray-800 mb-2">Sign In</h2>
             <p className="text-gray-500">Enter your credentials to continue</p>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           <div className="space-y-5">
             {/* Email Input */}
@@ -92,7 +130,7 @@ export default function BeautyLogin() {
                 <span className="text-sm text-gray-600">Remember me</span>
               </label>
               <a
-                href="#"
+                href="/forgot-password"
                 className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
               >
                 Forgot password?
@@ -101,7 +139,6 @@ export default function BeautyLogin() {
 
             {/* Submit Button */}
             <button
-              type="button"
               onClick={handleSubmit}
               disabled={isLoading}
               className="w-full bg-linear-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-full font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
@@ -132,7 +169,7 @@ export default function BeautyLogin() {
             </div>
           </div>
 
-          {/* Social Login */}
+          {/* Social Login (optional - you can remove if not needed) */}
           <div className="grid grid-cols-2 gap-3">
             <button className="flex items-center justify-center gap-2 border border-emerald-100 rounded-full py-3 hover:bg-emerald-50 transition-colors">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -169,7 +206,7 @@ export default function BeautyLogin() {
           <p className="text-center text-gray-600 mt-6">
             Don't have an account?{" "}
             <a
-              href="#"
+              href="/register"
               className="text-emerald-600 hover:text-emerald-700 font-medium"
             >
               Sign up
