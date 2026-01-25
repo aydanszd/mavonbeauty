@@ -15,13 +15,30 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        // Not required for OAuth users
+    },
+    githubId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    avatar: {
+        type: String,
+    },
+    login: {
+        type: String,
     },
     role: {
         type: String,
         enum: ['user', 'admin'],
         default: 'user',
         required: true
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    emailVerified: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,
@@ -31,6 +48,12 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
+});
+
+// Update timestamp before saving
+userSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    return next;
 });
 
 const User = mongoose.model('User', userSchema);

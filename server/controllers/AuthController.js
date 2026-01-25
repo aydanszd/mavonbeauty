@@ -1,6 +1,9 @@
 const UserModel = require("../models/userSchema");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { sendPasswordResetEmail, sendPasswordChangedEmail } = require("../utils/mailer");
+const passport = require('../config/passport');
 
 const GetAllUsersController = async (req, res) => {
     try {
@@ -191,6 +194,309 @@ const UpdateUserController = async (req, res) => {
     }
 }
 
+const AuthGithubCallback = async (req, res) => {
+    try {
+        console.log("=== GitHub Callback Started ===");
+        console.log("req.user:", req.user);
+
+        if (!req.user || !req.user.accessToken) {
+            console.log("ERROR: No user or tokens from GitHub");
+            return res.redirect(`${process.env.FRONTEND_URL}/login?error=github_failed`);
+        }
+
+        const userWithTokens = req.user;
+
+        // Extract user data (without sensitive info)
+        const userData = {
+            _id: userWithTokens._id,
+            name: userWithTokens.name,
+            email: userWithTokens.email,
+            avatar: userWithTokens.avatar
+        };
+
+        // URL encode the data
+        const encodedUserData = encodeURIComponent(JSON.stringify(userData));
+
+        // Redirect with tokens in URL
+        res.redirect(
+            `${process.env.FRONTEND_URL}/?accessToken=${userWithTokens.accessToken}&refreshToken=${userWithTokens.refreshToken}&user=${encodedUserData}&source=github`
+        );
+
+    } catch (error) {
+        console.error('❌ GitHub callback error:', error);
+        res.redirect(`${process.env.FRONTEND_URL}/login?error=github_error`);
+    }
+};
+
+// const AuthGithubCallback = async (req, res) => {
+//     console.log("=== GitHub Callback Started ===");
+//     console.log("req.user:", req.user);
+
+//     if (!req.user) {
+//         console.log("ERROR: No user data from GitHub");
+//         return res.redirect(`${process.env.FRONTEND_URL}/login?error=github_failed`);
+//     }
+
+//     const githubUser = req.user;
+//     console.log("GitHub user received:", githubUser.username);
+
+//     const userData = {
+//         id: githubUser.id,
+//         username: githubUser.username,
+//         name: githubUser.displayName || githubUser.username,
+//         email: githubUser.emails?.[0]?.value || `${githubUser.username}@github.com`,
+//         avatar: githubUser.photos?.[0]?.value,
+//         source: 'github'
+//     };
+
+//     // 🔑 ACCESS TOKEN (short-lived)
+//     const accessToken = jwt.sign(
+//         userData,
+//         process.env.SECURITY_KEY,
+//         { expiresIn: '15m' }
+//     );
+
+//     // 🔁 REFRESH TOKEN (long-lived)
+//     const refreshToken = jwt.sign(
+//         { id: userData.id },
+//         process.env.SECURITY_KEY, // Use same secret or create REFRESH_SECRET in .env
+//         { expiresIn: '7d' }
+//     );
+
+//     res.cookie('accessToken', accessToken, {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === 'production',
+//         maxAge: 3600000
+//     });
+
+//     res.cookie('refreshToken', refreshToken, {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV === 'production',
+//         maxAge: 3600000
+//     });
+
+//     console.log("Tokens generated for:", userData.username);
+
+//     res.status(200).json({
+//         success: true,  // ← This is crucial!
+//         message: "Login successful",
+//         accessToken,
+//         refreshToken,
+//         user: {
+//             _id: userData._id,
+//             name: userData.name,
+//             email: userData.email
+//         }
+//     });
+
+//     if (error) {
+//         console.error('❌ GitHub callback error:', error);
+//         // On error, redirect to login page
+//         res.redirect(`${process.env.FRONTEND_URL}/login?error=github_error`);
+//     }
+// };
+
+const RefreshToken = (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "Refresh token missing" });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+        const newAccessToken = jwt.sign(
+            { id: decoded.id },
+            process.env.SECURITY_KEY,
+            { expiresIn: '15m' }
+        );
+
+        res.json({ accessToken: newAccessToken });
+    } catch (err) {
+        return res.status(403).json({ message: "Invalid refresh token" });
+    }
+};
+
+
+// ========== FORGOT PASSWORD ==========
+const ForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required"
+            });
+        }
+
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+            // For security, don't reveal if user exists
+            return res.status(200).json({
+                success: true,
+                message: "If an account exists with this email, you will receive a password reset link"
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenHash = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+
+        // Set token and expiration (1 hour)
+        user.resetPasswordToken = resetTokenHash;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        await user.save();
+
+        // Send email
+        const emailSent = await sendPasswordResetEmail(email, resetToken);
+
+        if (!emailSent) {
+            return res.status(500).json({
+                success: false,
+                message: "Failed to send reset email. Please try again."
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset link sent to your email"
+        });
+
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Server error. Please try again."
+        });
+    }
+};
+
+// ========== RESET PASSWORD ==========
+const ResetPassword = async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Token and password are required"
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters"
+            });
+        }
+
+        // Hash the token to compare with stored hash
+        const resetTokenHash = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
+
+        // Find user with valid token
+        const user = await UserModel.findOne({
+            resetPasswordToken: resetTokenHash,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired reset token"
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update user
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        // Send confirmation email
+        await sendPasswordChangedEmail(user.email, user.name);
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successful. You can now login with your new password."
+        });
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Server error. Please try again."
+        });
+    }
+};
+
+// ========== VERIFY RESET TOKEN ==========
+const VerifyResetToken = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Token is required"
+            });
+        }
+
+        // Hash the token
+        const resetTokenHash = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex');
+
+        // Check if token is valid and not expired
+        const user = await UserModel.findOne({
+            resetPasswordToken: resetTokenHash,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired reset token"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Token is valid"
+        });
+
+    } catch (error) {
+        console.error('Verify token error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
+    }
+};
+
+
 module.exports = {
-    AuthRegister, AuthLogin, DeleteUserController, UpdateUserController, GetAllUsersController
+    AuthRegister,
+    AuthLogin,
+    DeleteUserController,
+    UpdateUserController,
+    GetAllUsersController,
+
+    AuthGithubCallback,
+    ForgotPassword,
+    ResetPassword,
+    VerifyResetToken,
+    RefreshToken
 };
