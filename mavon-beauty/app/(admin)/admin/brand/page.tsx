@@ -216,7 +216,7 @@ export default function BrandPage() {
                                     }}
                                 />
                             ) : null}
-                            <div className={`w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center ${brand.logo ? 'hidden' : ''}`}>
+                            <div className={`w-16 h-16 bg-linear-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center ${brand.logo ? 'hidden' : ''}`}>
                                 <Award className="w-8 h-8 text-white" />
                             </div>
                             <div className="flex-1">
@@ -360,7 +360,7 @@ export default function BrandPage() {
                                             }}
                                         />
                                     ) : (
-                                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                                        <div className="w-16 h-16 bg-linear-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
                                             <Award className="w-8 h-8 text-white" />
                                         </div>
                                     )}

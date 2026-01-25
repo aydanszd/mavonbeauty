@@ -84,7 +84,7 @@ export default function DashboardPage() {
                             <p className="text-gray-500 text-sm">Total Users</p>
                             <p className="text-3xl font-semibold text-gray-800 mt-2">{users.length}</p>
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                        <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
                             <Users className="w-6 h-6 text-white" />
                         </div>
                     </div>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                             <p className="text-gray-500 text-sm">Total Products</p>
                             <p className="text-3xl font-semibold text-gray-800 mt-2">{stats.totalProducts}</p>
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                        <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
                             <Package className="w-6 h-6 text-white" />
                         </div>
                     </div>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                             <p className="text-gray-500 text-sm">Total Stock</p>
                             <p className="text-3xl font-semibold text-gray-800 mt-2">{stats.totalStock}</p>
                         </div>
-                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                        <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
                             <Sparkles className="w-6 h-6 text-white" />
                         </div>
                     </div>

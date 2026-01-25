@@ -233,7 +233,7 @@ export default function SizePage() {
                                         className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors group"
                                     >
                                         <div className="text-center mb-3">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                            <div className="w-12 h-12 bg-linear-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                                                 <span className="text-white font-bold text-lg">{size.name}</span>
                                             </div>
                                             <p className="text-sm font-medium text-gray-700">{size.name}</p>
@@ -318,7 +318,7 @@ export default function SizePage() {
                             <div className="bg-gray-50 rounded-lg p-4">
                                 <p className="text-sm text-gray-600 mb-2">Preview:</p>
                                 <div className="flex items-center gap-3">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                                    <div className="w-16 h-16 bg-linear-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
                                         <span className="text-white font-bold text-xl">
                                             {formData.name || '?'}
                                         </span>

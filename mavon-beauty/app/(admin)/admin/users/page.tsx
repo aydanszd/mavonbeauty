@@ -10,7 +10,6 @@ interface User {
 }
 
 const API_BASE_URL = 'http://localhost:5000/api/v1';
-
 export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
@@ -81,7 +80,7 @@ export default function UsersPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+                        <thead className="bg-linear-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Name</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Email</th>
