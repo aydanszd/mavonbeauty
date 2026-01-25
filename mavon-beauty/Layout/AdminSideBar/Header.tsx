@@ -81,7 +81,7 @@ export default function AdminLayout({
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-emerald-600 to-teal-600 text-white transition-all duration-300`}>
+            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-linear-to-b from-emerald-600 to-teal-600 text-white transition-all duration-300`}>
                 <div className="p-4 border-b border-emerald-700">
                     <div className="flex items-center justify-between">
                         {sidebarOpen && (
