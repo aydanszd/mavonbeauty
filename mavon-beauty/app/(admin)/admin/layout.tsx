@@ -1,23 +1,25 @@
 "use client";
-import React from 'react';
-import AdminLayout from '@/Layout/AdminSideBar/Header';
-import { Home, Users, Package, Palette } from 'lucide-react';
+import React from "react";
+import AdminLayout from "@/Layout/AdminSideBar/Header";
+import { Home, Users, Package, Palette, Tag, Ruler } from "lucide-react";
 
 const menuItems = [
-    { id: 'dashboard', icon: Home, label: 'Dashboard', href: '/admin' },
-    { id: 'users', icon: Users, label: 'Users', href: '/admin/users' },
-    { id: 'products', icon: Package, label: 'Products', href: '/admin/products' },
-    { id: 'color', icon: Palette, label: 'Color', href: '/admin/color' },
+  { id: "dashboard", icon: Home, label: "Dashboard", href: "/admin" },
+  { id: "users", icon: Users, label: "Users", href: "/admin/users" },
+  { id: "products", icon: Package, label: "Products", href: "/admin/products" },
+  { id: "color", icon: Palette, label: "Color", href: "/admin/color" },
+  { id: "brand", icon: Tag, label: "Brand", href: "/admin/brand" },
+  { id: "size", icon: Ruler, label: "Size", href: "/admin/size" },
 ];
 
 export default function AdminLayoutWrapper({
-    children
+  children,
 }: {
-    children: React.ReactNode   
+  children: React.ReactNode;
 }) {
-    return (
-        <AdminLayout menuItems={menuItems}>
-            {children}
-        </AdminLayout>
-    );
+  return (
+    <AdminLayout menuItems={menuItems}>
+      {children}
+    </AdminLayout>
+  );
 }
