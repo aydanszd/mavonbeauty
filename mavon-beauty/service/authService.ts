@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/v1/auth";
+const API_URL = "http://localhost:3001/api/v1/auth";
 
 interface LoginData {
   email: string;
@@ -26,36 +26,61 @@ interface AuthResponse {
 
 export const loginUser = async (data: LoginData): Promise<AuthResponse> => {
   try {
+    console.log("🔵 Starting login request...");
+    console.log("📍 URL:", `${API_URL}/login`);
+
     const response = await fetch(`${API_URL}/login`, {
+      // Fixed URL
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", // For cookies
       body: JSON.stringify({
         email: data.email,
         password: data.password,
       }),
     });
 
-    const result = await response.json();
+    console.log("✅ Response received:", response.status);
 
     if (!response.ok) {
-      throw new Error(result.message || "Login failed");
+      const errorText = await response.text();
+      console.error("❌ Error response:", errorText);
+
+      let errorMessage = "Login failed";
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.message || errorMessage;
+      } catch (e) {
+        // Not JSON
+      }
+
+      return {
+        success: false,
+        message: errorMessage,
+      };
     }
+
+    const result = await response.json();
+    console.log("📄 Parsed result:", result);
 
     if (result.token) {
-      // Store token in localStorage or cookies
       localStorage.setItem("token", result.token);
       localStorage.setItem("user", JSON.stringify(result.user));
+      console.log("💾 Token saved to localStorage");
     }
 
-    return result;
+    return {
+      success: true,
+      message: result.message || "Login successful",
+      token: result.token,
+      user: result.user,
+    };
   } catch (error: any) {
-    console.error("Login error:", error);
+    console.error("💥 Login error:", error);
     return {
       success: false,
-      message: error.message || "Network error. Please try again.",
+      message: error.message || "Network error",
     };
   }
 };
@@ -64,54 +89,149 @@ export const registerUser = async (
   data: RegisterData,
 ): Promise<AuthResponse> => {
   try {
-    // Remove confirmPassword before sending to server
-    const { confirmPassword, surname, ...registerData } = data;
+    const payload = {
+      name: `${data.name} ${data.surname || ""}`.trim(),
+      email: data.email,
+      password: data.password,
+    };
+
+    console.log("🔵 Starting registration request...");
+    console.log("📍 URL:", `${API_URL}/register`);
+    console.log("📦 Payload:", { ...payload, password: "***" });
 
     const response = await fetch(`${API_URL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify({
-        name: `${data.name} ${data.surname || ""}`.trim(),
-        email: data.email,
-        password: data.password,
-      }),
+      body: JSON.stringify(payload),
     });
 
-    const result = await response.json();
+    console.log("✅ Response received:", response.status, response.statusText);
+    console.log(
+      "📋 Response headers:",
+      Object.fromEntries(response.headers.entries()),
+    );
 
+    // Check if response is ok before parsing
     if (!response.ok) {
-      throw new Error(result.message || "Registration failed");
+      const errorText = await response.text();
+      console.error("❌ Error response:", errorText);
+
+      let errorMessage = `Registration failed: ${response.status}`;
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.message || errorMessage;
+      } catch (e) {
+        // Not JSON, use text
+        errorMessage = errorText || errorMessage;
+      }
+
+      return {
+        success: false,
+        message: errorMessage,
+      };
     }
 
-    return result;
+    const result = await response.json();
+    console.log("📄 Parsed result:", result);
+
+    return {
+      success: true,
+      message: result.message || "Registration successful",
+      token: result.token,
+      user: result.user,
+    };
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("💥 Registration error:", error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+
+    // More specific error messages
+    let errorMessage = "Network error. Please try again.";
+
+    if (error.name === "TypeError" && error.message.includes("fetch")) {
+      errorMessage =
+        "Cannot connect to server. Please ensure the backend is running on http://localhost:3001";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
     return {
       success: false,
-      message: error.message || "Network error. Please try again.",
+      message: errorMessage,
     };
   }
 };
 
 export const logoutUser = () => {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  // You might also want to call a logout API endpoint
 };
 
 export const getCurrentUser = () => {
-  if (typeof window !== "undefined") {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
-  }
-  return null;
+  const userStr =
+    sessionStorage.getItem("user") || localStorage.getItem("user");
+  return userStr ? JSON.parse(userStr) : null;
 };
 
 export const isAuthenticated = () => {
-  if (typeof window !== "undefined") {
-    return !!localStorage.getItem("token");
+  return !!getToken();
+};
+
+// Test connection function
+export const testConnection = async () => {
+  try {
+    console.log("🔍 Testing connection to backend...");
+    const testUrl = `http://localhost:3001/api/test`;
+    console.log("📍 Test URL:", testUrl);
+
+    const response = await fetch(testUrl, {
+      method: "GET",
+    });
+
+    console.log("✅ Test response:", response.status);
+
+    const result = await response.json();
+    console.log("📄 Test result:", result);
+
+    return {
+      success: true,
+      message: result.message || "Connection successful",
+    };
+  } catch (error: any) {
+    console.error("💥 Connection test failed:", error);
+    return {
+      success: false,
+      message: error.message || "Cannot connect to server",
+    };
   }
-  return false;
+};
+
+export const handleGithubCallback = (token: any, userData: any) => {
+  // Store token in both storage types
+  localStorage.setItem("token", token);
+  sessionStorage.setItem("token", token);
+
+  // Store user data
+  localStorage.setItem("user", JSON.stringify(userData));
+  sessionStorage.setItem("user", JSON.stringify(userData));
+
+  return { success: true, user: userData };
+};
+
+export const getToken = () => {
+  // Try to get token from sessionStorage first, then localStorage
+  return sessionStorage.getItem("token") || localStorage.getItem("token");
+};
+
+export const getRefreshToken = () => {
+  return (
+    sessionStorage.getItem("refreshToken") ||
+    localStorage.getItem("refreshToken")
+  );
 };
