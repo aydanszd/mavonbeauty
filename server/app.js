@@ -12,6 +12,7 @@ const brandRouter = require("./routers/brandRouter");
 const colorRouter = require("./routers/colorRouter");
 const sizeRouter = require("./routers/sizeRouter");
 const orderRouter = require("./routers/orderRouter");
+const commentRoutes = require('./routers/commentsRouter');
 
 const app = express();
 const path = require('path');
@@ -60,6 +61,7 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/colors", colorRouter);
 app.use("/api/v1/sizes", sizeRouter);
 app.use("/api/v1/orders", orderRouter);
+app.use('/api/v1/comments', commentRoutes);
 
 
 app.get('/api/v1/health', (req, res) => {
