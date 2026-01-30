@@ -140,9 +140,9 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     loadCurrentUserCart();
   }, [loadCurrentUserCart]);
 
-  // Calculate total items in cart
+  // Badge: unique products (same product+color+weight = 1, different product = +1)
   const getCartItemCount = useCallback((): number => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
+    return cartItems.length;
   }, [cartItems]);
 
   // Save cart to user-specific localStorage

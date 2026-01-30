@@ -13,9 +13,10 @@ import {
   Send,
   Edit,
   Trash2,
+  Star,
+  StarHalf,
 } from "lucide-react";
 import { useCart } from "@/context/CardContext";
-import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 
 interface Color {
   _id: string;
@@ -84,10 +85,10 @@ const StarRating = ({
         <button
           key={i}
           onClick={() => onRatingClick(i)}
-          className={`${i <= rating ? "text-yellow-400" : "text-gray-300"} hover:scale-110 transition-transform`}
+          className={`${i <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 fill-none"} hover:scale-110 transition-transform`}
           style={{ fontSize: `${size}px` }}
         >
-          <FaStar />
+          <Star size={size} />
         </button>,
       );
     } else {
@@ -96,26 +97,26 @@ const StarRating = ({
 
       if (i <= fullStars) {
         stars.push(
-          <FaStar
+          <Star
             key={i}
-            className="text-yellow-400"
-            style={{ fontSize: `${size}px` }}
+            size={size}
+            className="fill-yellow-400 text-yellow-400"
           />,
         );
       } else if (i === fullStars + 1 && hasHalfStar) {
         stars.push(
-          <FaStarHalfAlt
+          <StarHalf
             key={i}
-            className="text-yellow-400"
-            style={{ fontSize: `${size}px` }}
+            size={size}
+            className="fill-yellow-400 text-yellow-400"
           />,
         );
       } else {
         stars.push(
-          <FaRegStar
+          <Star
             key={i}
-            className="text-gray-300"
-            style={{ fontSize: `${size}px` }}
+            size={size}
+            className="fill-none text-gray-300"
           />,
         );
       }
@@ -744,7 +745,7 @@ export default function ShopDetailMain() {
                 </div>
 
                 <button
-                  onClick={handleBuyNow}
+                  onClick={handleAddToCart}
                   disabled={product.stock === 0 || isAddingToCart}
                   className="flex-1 flex items-center justify-center gap-2 border-2 border-gray-900 text-gray-900 py-4 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >

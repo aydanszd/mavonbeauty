@@ -160,7 +160,7 @@ export default function BasketPage() {
 
   const handleDecrementQuantity = (id: string): void => {
     const item = contextCartItems.find((item) => item.id === id);
-    if (item && item.quantity > 1) {
+    if (item) {
       const newQuantity = item.quantity - 1;
       console.log(`➖ Decrementing item ${id} to ${newQuantity}`);
 
@@ -168,22 +168,20 @@ export default function BasketPage() {
       const weight = item.selectedWeight || item.deliveryMethod || "Standard";
 
       updateQuantity(id, color, weight, newQuantity);
-      // Force refresh - ADD THIS LINE
       setRefreshTrigger((prev) => prev + 1);
     }
   };
 
   const handleUpdateQuantity = (id: string, value: string): void => {
-    const quantity = Math.max(1, parseInt(value) || 1);
+    const quantity = parseInt(value, 10);
     const item = contextCartItems.find((item) => item.id === id);
-    if (item) {
+    if (item && !isNaN(quantity) && quantity >= 0) {
       console.log(`✏️ Updating item ${id} quantity to ${quantity}`);
 
       const color = item.selectedColor || item.color || "Clear";
       const weight = item.selectedWeight || item.deliveryMethod || "Standard";
 
-      updateQuantity(id, color, weight, quantity);
-      // Force refresh - ADD THIS LINE
+      updateQuantity(id, color, weight, quantity === 0 ? 0 : quantity);
       setRefreshTrigger((prev) => prev + 1);
     }
   };
