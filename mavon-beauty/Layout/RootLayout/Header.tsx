@@ -21,6 +21,7 @@ import {
   logoutUser,
   notifyUserChanged,
 } from "@/service/authService";
+import { setAccessTokenCookie, clearAccessTokenCookie } from "@/utils/cookieUtils";
 import { useCart } from "@/context/CardContext";
 
 interface UserData {
@@ -66,10 +67,11 @@ export default function Navbar() {
           try {
             const userData: UserData = JSON.parse(decodeURIComponent(userStr));
 
-            // Save tokens
+            // Save tokens (cookie for middleware to read on /admin)
             localStorage.setItem("accessToken", accessToken);
             localStorage.setItem("refreshToken", refreshToken);
             localStorage.setItem("user", JSON.stringify(userData));
+            setAccessTokenCookie(accessToken);
 
             setUser(userData);
             setAuthenticated(true);
@@ -123,6 +125,7 @@ export default function Navbar() {
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("user");
+            clearAccessTokenCookie();
             setAuthenticated(false);
             setUser(null);
           }
@@ -152,6 +155,7 @@ export default function Navbar() {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("user");
+          clearAccessTokenCookie();
           setAuthenticated(false);
           setUser(null);
         }

@@ -1,6 +1,7 @@
 // service/authService.ts - COMPLETE UPDATED VERSION
 const API_URL = "http://localhost:3001/api/v1/auth";
 import { emitAuthEvent } from "@/utils/events";
+import { setAccessTokenCookie, clearAccessTokenCookie } from "@/utils/cookieUtils";
 
 interface RegisterData {
   name: string;
@@ -92,10 +93,11 @@ export const loginUser = async (data: LoginData): Promise<AuthResponse> => {
     if (result.success) {
       const userId = result.user?.id || result.user?._id || "";
 
-      // Store tokens in localStorage
+      // Store tokens in localStorage and cookie (cookie for middleware)
       if (result.accessToken) {
         localStorage.setItem("accessToken", result.accessToken);
-        console.log("💾 Access token stored in localStorage");
+        setAccessTokenCookie(result.accessToken);
+        console.log("💾 Access token stored in localStorage and cookie");
       }
 
       if (result.refreshToken) {
@@ -226,7 +228,8 @@ export const registerUser = async (
       // Store tokens and user data
       if (result.accessToken) {
         localStorage.setItem("accessToken", result.accessToken);
-        console.log("💾 Access token stored in localStorage");
+        setAccessTokenCookie(result.accessToken);
+        console.log("💾 Access token stored in localStorage and cookie");
       }
 
       if (result.refreshToken) {
@@ -371,6 +374,7 @@ export const logoutUser = (): void => {
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
   localStorage.removeItem("userRole");
+  clearAccessTokenCookie();
 
   sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("refreshToken");
@@ -450,6 +454,7 @@ export const refreshAccessToken = async (): Promise<string | null> => {
       const data = await response.json();
       if (data.success && data.accessToken) {
         localStorage.setItem("accessToken", data.accessToken);
+        setAccessTokenCookie(data.accessToken);
         console.log("✅ Access token refreshed");
         return data.accessToken;
       }

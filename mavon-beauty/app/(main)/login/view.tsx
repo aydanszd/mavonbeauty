@@ -39,10 +39,8 @@ export default function BeautyLogin() {
 
         // Check user role and redirect
         if (result.user?.role === "admin") {
-          // Admin goes to admin panel
-          router.push("/");
+          router.push("/admin");
         } else {
-          // Regular user goes to home
           router.push("/");
         }
       } else {

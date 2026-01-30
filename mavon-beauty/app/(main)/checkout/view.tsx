@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CardContext";
+import { setAccessTokenCookie, clearAccessTokenCookie } from "@/utils/cookieUtils";
 
 const checkoutSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -167,8 +168,8 @@ export default function CheckoutForm() {
       console.log("Refresh token response:", data);
 
       if (data.success && data.accessToken) {
-        // Store the new access token
         localStorage.setItem("accessToken", data.accessToken);
+        setAccessTokenCookie(data.accessToken);
 
         // If new refresh token is provided, store it too
         if (data.refreshToken) {
@@ -216,6 +217,7 @@ export default function CheckoutForm() {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
+        clearAccessTokenCookie();
         alert("Session expired. Please login again.");
         router.push("/login");
         throw new Error("Session expired");
@@ -253,6 +255,7 @@ export default function CheckoutForm() {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
+        clearAccessTokenCookie();
         alert("Session expired. Please login again.");
         router.push("/login");
         throw new Error("Session expired");

@@ -1,4 +1,3 @@
-// middleware.ts (in root of your project)
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -8,16 +7,12 @@ export async function middleware(request: NextRequest) {
   // Protect admin routes
   if (pathname.startsWith("/admin")) {
     try {
-      // Check for access token
-      const accessToken =
-        request.cookies.get("accessToken")?.value ||
-        localStorage.getItem("accessToken");
+      const accessToken = request.cookies.get("accessToken")?.value;
 
       if (!accessToken) {
         return NextResponse.redirect(new URL("/login", request.url));
       }
 
-      // Verify user is admin
       const response = await fetch("http://localhost:3001/api/v1/auth/user", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
