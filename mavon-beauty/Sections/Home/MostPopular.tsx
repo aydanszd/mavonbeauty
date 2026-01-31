@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface Product {
   _id: string;
@@ -22,6 +22,7 @@ export default function MostPopular() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchHomePageProducts();
@@ -43,6 +44,20 @@ export default function MostPopular() {
     }
   };
 
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 400; // Scroll by approximately one product width
+      const newScrollLeft =
+        scrollContainerRef.current.scrollLeft +
+        (direction === "left" ? -scrollAmount : scrollAmount);
+      
+      scrollContainerRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: "smooth",
+      });
+    }
+  };
+
   // Show skeleton loading with same UI structure
   if (loading) {
     return (
@@ -54,9 +69,9 @@ export default function MostPopular() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-12 text-gray-800">
             Most Popular
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex gap-6 overflow-hidden">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse">
+              <div key={i} className="shrink-0 w-72 animate-pulse">
                 <div className="bg-gray-200 h-96 mb-4 rounded"></div>
                 <div className="h-4 bg-gray-200 rounded mb-2"></div>
                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -97,23 +112,36 @@ export default function MostPopular() {
           Most Popular
         </h2>
         <div className="relative">
-          <button className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 w-12 h-12 rounded-full border-2 border-gray-300 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors">
+          <button
+            onClick={() => scroll("left")}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 w-12 h-12 rounded-full border-2 border-gray-300 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors"
+          >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
 
-          <button className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 w-12 h-12 rounded-full border-2 border-gray-300 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors">
+          <button
+            onClick={() => scroll("right")}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 w-12 h-12 rounded-full border-2 border-gray-300 bg-white hover:bg-gray-50 flex items-center justify-center transition-colors"
+          >
             <ChevronRight className="w-6 h-6 text-gray-600" />
           </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ">
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
             {products.map((product, index) => (
-              <div key={product._id} className="group">
+              <div key={product._id} className="shrink-0 w-72 group">
                 <div
-                  className="relative mb-4 overflow-hidden bg-transparent "
+                  className="relative mb-4 overflow-hidden bg-transparent"
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 >
-                  <div className="h-100 w-full relative ">
+                  <div className="h-96 w-full relative">
                     <img
                       src={
                         product.images && product.images.length > 0
@@ -147,7 +175,7 @@ export default function MostPopular() {
                       }}
                     />
                   </div>
-                  <button className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white hover:bg-green-200 text-black  flex items-center justify-center transition-colors shadow-lg">
+                  <button className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white hover:bg-green-200 text-black flex items-center justify-center transition-colors shadow-lg">
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
@@ -159,19 +187,16 @@ export default function MostPopular() {
                     From ${product.price.toFixed(2)}
                   </p>
                   <div className="flex items-center justify-left gap-2">
-                    {/* Show brand as a color badge if available */}
                     {product.brand && (
                       <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                         {product.brand}
                       </span>
                     )}
-                    {/* Show color info if available */}
                     {product.color && (
                       <span className="text-xs text-gray-600">
                         {product.color}
                       </span>
                     )}
-                    {/* Show image count as extra colors */}
                     {product.images && product.images.length > 3 && (
                       <span className="text-sm text-gray-600">
                         +{product.images.length - 3}
@@ -184,6 +209,12 @@ export default function MostPopular() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 }
