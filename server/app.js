@@ -52,9 +52,10 @@ connectDb();
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Use the auth router (routes are exactly the same, just moved to separate file)
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Only serve static uploads folder if not on Vercel (local development)
+if (process.env.VERCEL !== '1') {
+    app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+}
 app.use('/api/v1/auth', authRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/brands", brandRouter);

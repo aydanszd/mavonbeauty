@@ -11,6 +11,7 @@ let storage;
 
 if (isVercel) {
     // Memory storage for Vercel
+    console.log('🚀 Using memory storage for Vercel');
     storage = multer.memoryStorage();
 } else {
     // Disk storage for local development
@@ -20,21 +21,27 @@ if (isVercel) {
     try {
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
+            console.log('✅ Created uploads directory:', uploadDir);
         }
     } catch (err) {
         console.warn('⚠️ Warning: Could not create uploads directory:', err.message);
+        console.warn('⚠️ Using memory storage as fallback');
+        storage = multer.memoryStorage();
     }
 
-    storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, uploadDir);
-        },
-        filename: function (req, file, cb) {
-            // Generate unique filename: product-1234567890-image.jpg
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
-        }
-    });
+    // Only use disk storage if directory was created successfully
+    if (!storage) {
+        storage = multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, uploadDir);
+            },
+            filename: function (req, file, cb) {
+                // Generate unique filename: product-1234567890-image.jpg
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                cb(null, 'product-' + uniqueSuffix + path.extname(file.originalname));
+            }
+        });
+    }
 }
 
 // File filter (only images)
