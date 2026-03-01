@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import type { Swiper as SwiperType } from "swiper";
 import { useTranslations } from "next-intl";
+import { API_BASE_URL, API_ORIGIN } from "@/config/api";
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -54,8 +55,6 @@ interface ProductCardProduct {
   reviews?: number;
   originalPrice?: number;
 }
-
-const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export default function MostPopular() {
   const [products, setProducts] = useState<ProductCardProduct[]>([]);

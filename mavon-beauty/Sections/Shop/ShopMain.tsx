@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import {
   ChevronDown,
   ChevronUp,
@@ -15,6 +15,7 @@ import "react-range-slider-input/dist/style.css";
 import ProductCard from "@/Components/ProductCard";
 import Pagination from "@/Components/Pagination";
 import { useTranslations } from "next-intl";
+import { API_BASE_URL, API_ORIGIN } from "@/config/api";
 
 interface Product {
   _id: string;
@@ -69,8 +70,6 @@ interface PaginationState {
   page: number;
   itemsPerPage: number;
 }
-
-const API_BASE_URL = "http://localhost:3001/api/v1";
 
 // Helper function to save to localStorage
 const saveToLocalStorage = (key: string, data: any) => {
@@ -584,6 +583,7 @@ export default function ShopMain() {
   };
 
   const handleProductClick = (productId: string) => {
+    // Use locale-aware router so URLs always include current locale
     router.push(`/shop/${productId}`);
   };
 

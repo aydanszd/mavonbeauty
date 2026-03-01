@@ -3,7 +3,7 @@
 import { X, Minus, Plus, ArrowRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/context/CardContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 interface ColorOption {
   name: string;

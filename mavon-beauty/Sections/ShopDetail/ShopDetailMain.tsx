@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import {
   Minus,
   Plus,
@@ -18,6 +19,7 @@ import {
 import { useCart } from "@/context/CardContext";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { API_BASE_URL, API_ORIGIN } from "@/config/api";
 
 interface Color {
   _id: string;
@@ -61,8 +63,6 @@ interface ReviewStats {
     count: number;
   }>;
 }
-
-const API_BASE_URL = "http://localhost:3001/api/v1";
 
 // Star Rating Component
 const StarRating = ({
@@ -442,7 +442,7 @@ export default function ShopDetailMain() {
         price: product.price,
         originalPrice: product.price,
         image: product.images?.[0]
-          ? `${API_BASE_URL.replace("/api/v1", "")}${product.images[0]}`
+          ? `${API_ORIGIN}${product.images[0]}`
           : "https://via.placeholder.com/600x600?text=No+Image",
         selectedColor: {
           name: selectedColor,
