@@ -103,9 +103,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userSchema');
 
 passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.GITHUB_CALLBACK_URL,
+    clientID: process.env.GITHUB_CLIENT_ID || 'placeholder',
+    clientSecret: process.env.GITHUB_CLIENT_SECRET || 'placeholder',
+    callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback',
     scope: ['user:email']
 },
     async function (accessToken, refreshToken, profile, done) {
