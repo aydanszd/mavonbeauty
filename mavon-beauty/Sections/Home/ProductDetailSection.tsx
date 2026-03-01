@@ -17,7 +17,7 @@ export default function ProductDetailSection() {
   const [selectedWeight, setSelectedWeight] = useState("100gm");
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const thumbnailRef = React.useRef(null);
+  const thumbnailRef = React.useRef<HTMLDivElement>(null);
   const t = useTranslations("Home.productDetail");
 
   const feature = t.raw("features"); // For array translation

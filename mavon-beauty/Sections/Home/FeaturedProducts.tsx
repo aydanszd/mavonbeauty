@@ -4,8 +4,8 @@ import { useState } from "react";
 
 export default function FeaturedProducts() {
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [hoveredProduct, setHoveredProduct] = useState(null);
-    const [hoveredHotspot, setHoveredHotspot] = useState(null);
+    const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+    const [hoveredHotspot, setHoveredHotspot] = useState<number | null>(null);
 
     const products = [
         {

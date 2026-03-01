@@ -18,7 +18,7 @@ export default function Recent() {
 
   const products = [
     {
-      id: 1,
+      id: "1",
       name: "Neutrogena Hydro Boost Water Gel",
       price: 500,
       image:
@@ -28,7 +28,7 @@ export default function Recent() {
       showWishlist: true,
     },
     {
-      id: 2,
+      id: "2",
       name: "Cetaphil Gentle Skin Cleanser",
       price: 280,
       image: "https://images.unsplash.com/photo-1556228578-dd3f6e90bc1a?w=600",
@@ -37,7 +37,7 @@ export default function Recent() {
       showWishlist: true,
     },
     {
-      id: 3,
+      id: "3",
       name: "Hyaluronic Acid Moisturizer",
       price: 200,
       image:
@@ -47,7 +47,7 @@ export default function Recent() {
       showWishlist: true,
     },
     {
-      id: 4,
+      id: "4",
       name: "Luxurious Body Butter",
       price: 200,
       image:
@@ -57,7 +57,7 @@ export default function Recent() {
       showWishlist: true,
     },
     {
-      id: 5,
+      id: "5",
       name: "Vitamin C Serum",
       price: 450,
       image: "https://images.unsplash.com/photo-1556229010-aa1e86d66414?w=600",
