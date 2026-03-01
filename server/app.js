@@ -3,7 +3,9 @@ const session = require('express-session');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDb = require('./db/ConnectDb');
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const passport = require('./config/passport');  // Import passport config
 const authRouter = require('./routers/userRouter');  // Import auth routes
 const userRouter = require("./routers/userRouter");
