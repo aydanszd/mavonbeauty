@@ -1,6 +1,33 @@
 const Product = require('../models/Products');
 const fs = require('fs');
 const path = require('path');
+const { isVercel } = require('../config/multerConfig');
+
+// Helper function to get image path/data
+const getImageData = (file) => {
+    if (isVercel && file.buffer) {
+        // For Vercel, convert to base64
+        return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    }
+    // For local, return file path
+    return `/uploads/products/${file.filename}`;
+};
+
+// Helper function to delete image files (only for local)
+const deleteImageFile = (imagePath) => {
+    if (isVercel) {
+        // Base64 images don't need to be deleted from filesystem
+        return;
+    }
+    try {
+        const fullPath = path.join(__dirname, '..', imagePath);
+        if (fs.existsSync(fullPath)) {
+            fs.unlinkSync(fullPath);
+        }
+    } catch (err) {
+        console.warn('⚠️ Warning: Could not delete image file:', err.message);
+    }
+};
 
 // Get all products
 const getAllProducts = async (req, res) => {
@@ -61,16 +88,6 @@ const createProduct = async (req, res) => {
 
         // Validation
         if (!name || !brand || weight === undefined || price === undefined) {
-            // Delete uploaded files if validation fails
-            if (req.files && req.files.length > 0) {
-                req.files.forEach(file => {
-                    const filePath = path.join(__dirname, '..', 'uploads', 'products', file.filename);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                });
-            }
-
             return res.status(400).json({
                 success: false,
                 message: 'Please provide name, brand, weight and price'
@@ -119,7 +136,7 @@ const createProduct = async (req, res) => {
 
         // Add images if uploaded
         if (req.files && req.files.length > 0) {
-            productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
+            productData.images = req.files.map(file => getImageData(file));
         }
 
         console.log('📦 Creating product with data:', productData);
@@ -133,15 +150,6 @@ const createProduct = async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error creating product:', error);
-        // Delete uploaded files if product creation fails
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => {
-                const filePath = path.join(__dirname, '..', 'uploads', 'products', file.filename);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            });
-        }
 
         res.status(500).json({
             success: false,
@@ -159,16 +167,6 @@ const updateProduct = async (req, res) => {
         let product = await Product.findById(req.params.id);
 
         if (!product) {
-            // Delete uploaded files if product not found
-            if (req.files && req.files.length > 0) {
-                req.files.forEach(file => {
-                    const filePath = path.join(__dirname, '..', 'uploads', 'products', file.filename);
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                });
-            }
-
             return res.status(404).json({
                 success: false,
                 message: 'Product not found'
@@ -219,18 +217,15 @@ const updateProduct = async (req, res) => {
 
         // Add new images if uploaded (don't delete old ones, just append)
         if (req.files && req.files.length > 0) {
-            const newImages = req.files.map(file => `/uploads/products/${file.filename}`);
+            const newImages = req.files.map(file => getImageData(file));
             product.images = [...(product.images || []), ...newImages];
 
             // Limit to 5 images max
             if (product.images.length > 5) {
-                // Delete excess old images from filesystem
+                // Delete excess old images
                 const imagesToDelete = product.images.slice(0, product.images.length - 5);
                 imagesToDelete.forEach(img => {
-                    const imagePath = path.join(__dirname, '..', img);
-                    if (fs.existsSync(imagePath)) {
-                        fs.unlinkSync(imagePath);
-                    }
+                    deleteImageFile(img);
                 });
                 product.images = product.images.slice(-5);
             }
@@ -251,15 +246,6 @@ const updateProduct = async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error updating product:', error);
-        // Delete uploaded files if update fails
-        if (req.files && req.files.length > 0) {
-            req.files.forEach(file => {
-                const filePath = path.join(__dirname, '..', 'uploads', 'products', file.filename);
-                if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                }
-            });
-        }
 
         res.status(500).json({
             success: false,
@@ -284,10 +270,7 @@ const deleteProduct = async (req, res) => {
         // Delete associated images
         if (product.images && product.images.length > 0) {
             product.images.forEach(img => {
-                const imagePath = path.join(__dirname, '..', img);
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                }
+                deleteImageFile(img);
             });
         }
 
@@ -329,11 +312,8 @@ const deleteProductImage = async (req, res) => {
         // Remove image from array
         product.images = product.images.filter(img => img !== imageUrl);
 
-        // Delete image file
-        const imagePath = path.join(__dirname, '..', imageUrl);
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
+        // Delete image file (only if local storage)
+        deleteImageFile(imageUrl);
 
         await product.save();
 
