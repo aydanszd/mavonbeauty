@@ -13,6 +13,7 @@ import {
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 import ProductCard from "@/Components/ProductCard";
+import PLACEHOLDER from "@/Components/placeholder";
 import Pagination from "@/Components/Pagination";
 import { useTranslations } from "next-intl";
 import { API_BASE_URL, API_ORIGIN } from "@/config/api";
@@ -636,7 +637,7 @@ export default function ShopMain() {
       price: product.price,
       image: product.images?.[0]
         ? `${API_BASE_URL.replace("/api/v1", "")}${product.images[0]}`
-        : "https://via.placeholder.com/600x600?text=No+Image",
+        : PLACEHOLDER,
       colors: productColorHexes.slice(0, 3),
       moreColors:
         productColorHexes.length > 3 ? productColorHexes.length - 3 : 0,

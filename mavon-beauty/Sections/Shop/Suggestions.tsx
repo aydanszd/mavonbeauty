@@ -1,5 +1,6 @@
 "use client";
 import ProductCard from "@/Components/ProductCard";
+import PLACEHOLDER from "@/Components/placeholder";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -10,6 +11,9 @@ import { useTranslations } from "next-intl";
 
 // Import Swiper styles
 import "swiper/css";
+
+import { API_BASE_URL } from "../../config/api";
+import { getFullImageUrl } from "../../utils/imageHelpers";
 
 interface Product {
   id: string;
@@ -28,8 +32,6 @@ interface Product {
   color?: string;
   stock?: number;
 }
-
-const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export default function Suggestions() {
   const prevRef = useRef<HTMLButtonElement>(null);
@@ -85,7 +87,7 @@ export default function Suggestions() {
               Math.random() > 0.8 ? product.price * 1.2 : undefined;
 
             // Get image URL
-            let imageUrl = "https://via.placeholder.com/400x500?text=No+Image";
+            let imageUrl = PLACEHOLDER;
             if (product.images && product.images.length > 0) {
               const firstImage = product.images[0];
               imageUrl = getFullImageUrl(firstImage);
@@ -130,16 +132,6 @@ export default function Suggestions() {
     fetchRandomProducts();
   }, []);
 
-  // Helper function to get full image URL
-  const getFullImageUrl = (imagePath: string): string => {
-    if (imagePath.startsWith("http")) {
-      return imagePath;
-    } else if (imagePath.startsWith("/")) {
-      return `${API_BASE_URL.replace("/api/v1", "")}${imagePath}`;
-    } else {
-      return `${API_BASE_URL.replace("/api/v1", "")}/${imagePath}`;
-    }
-  };
 
   // Helper function to generate colors from product data
   const generateColorsFromProduct = (product: any): string[] => {

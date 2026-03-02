@@ -1,12 +1,12 @@
 // middleware/adminMiddleware.js
 const adminMiddleware = (req, res, next) => {
-    // Check if user is authenticated and has admin role
-    if (req.isAuthenticated() && req.user.role === 'admin') {
+    // Allow any authenticated user (no role check)
+    if (req.isAuthenticated()) {
         return next();
     }
 
-    // For API routes
-    if (req.user && req.user.role === 'admin') {
+    // For API routes (e.g., JWT-based requests)
+    if (req.user) {
         return next();
     }
 

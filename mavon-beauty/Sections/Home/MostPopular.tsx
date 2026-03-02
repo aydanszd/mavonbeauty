@@ -10,6 +10,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
 import "swiper/css";
 import ProductCard from "@/Components/ProductCard";
+import PLACEHOLDER from "@/Components/placeholder";
 
 interface Product {
   _id: string;
@@ -199,7 +200,7 @@ export default function MostPopular() {
               Math.random() > 0.7 ? product.price * 1.2 : undefined;
 
             // Transform image URL
-            let imageUrl = "https://via.placeholder.com/400x500?text=No+Image";
+            let imageUrl = PLACEHOLDER;
             if (product.images && product.images.length > 0) {
               const firstImage = product.images[0];
               if (firstImage.startsWith("http")) {

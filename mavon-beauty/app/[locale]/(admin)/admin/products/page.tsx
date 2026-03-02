@@ -44,6 +44,7 @@ interface Size {
 }
 
 const API_BASE_URL = "http://localhost:3001/api/v1";
+import PLACEHOLDER from "@/Components/placeholder";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -389,8 +390,7 @@ export default function ProductsPage() {
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src =
-                      "https://via.placeholder.com/300x200?text=No+Image";
+                    e.currentTarget.src = PLACEHOLDER;
                   }}
                 />
               ) : (

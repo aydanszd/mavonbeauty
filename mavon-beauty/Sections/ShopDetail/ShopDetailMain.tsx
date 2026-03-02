@@ -20,6 +20,7 @@ import { useCart } from "@/context/CardContext";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { API_BASE_URL, API_ORIGIN } from "@/config/api";
+import PLACEHOLDER from "@/Components/placeholder";
 
 interface Color {
   _id: string;
@@ -443,7 +444,7 @@ export default function ShopDetailMain() {
         originalPrice: product.price,
         image: product.images?.[0]
           ? `${API_ORIGIN}${product.images[0]}`
-          : "https://via.placeholder.com/600x600?text=No+Image",
+          : PLACEHOLDER,
         selectedColor: {
           name: selectedColor,
           hex: colorHex,
@@ -528,7 +529,7 @@ export default function ShopDetailMain() {
       ? product.images.map(
           (img) => `${API_BASE_URL.replace("/api/v1", "")}${img}`,
         )
-      : ["https://via.placeholder.com/600x600?text=No+Image"];
+      : [PLACEHOLDER];
 
   const mainImage = productImages[selectedImageIndex] || productImages[0];
 
@@ -544,9 +545,8 @@ export default function ShopDetailMain() {
                 src={mainImage}
                 alt={product.name}
                 className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.src =
-                    "https://via.placeholder.com/600x600?text=No+Image";
+                  onError={(e) => {
+                  e.currentTarget.src = PLACEHOLDER;
                 }}
               />
             </div>
@@ -569,8 +569,7 @@ export default function ShopDetailMain() {
                       alt={`${product.name} ${index + 2}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.src =
-                          "https://via.placeholder.com/300x300?text=No+Image";
+                        e.currentTarget.src = PLACEHOLDER;
                       }}
                     />
                   </button>
