@@ -13,10 +13,8 @@ import {
 import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 import ProductCard from "@/Components/ProductCard";
-import PLACEHOLDER from "@/Components/placeholder";
 import Pagination from "@/Components/Pagination";
 import { useTranslations } from "next-intl";
-import { API_BASE_URL, API_ORIGIN } from "@/config/api";
 
 interface Product {
   _id: string;
@@ -71,6 +69,33 @@ interface PaginationState {
   page: number;
   itemsPerPage: number;
 }
+
+const API_BASE_URL = "http://localhost:3001/api/v1";
+
+// Static Unsplash product images pool
+const STATIC_IMAGES = [
+  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFrZXVwJTIwcHJvZHVjdHN8ZW58MHx8MHx8fDA%3D",
+  "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFrZXVwJTIwcHJvZHVjdHN8ZW58MHx8MHx8fDA%3D",
+  "https://images.unsplash.com/photo-1542452255191-c85a98f2c5d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bWFrZXVwJTIwcHJvZHVjdHN8ZW58MHx8MHx8fDA%3D",
+  "https://images.unsplash.com/photo-1557205465-f3762edea6d3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bWFrZXVwJTIwcHJvZHVjdHN8ZW58MHx8MHx8fDA%3D",
+  "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1556906781-9a412961a28b?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1539185441755-769473a23570?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=600&fit=crop",
+  "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&h=600&fit=crop",
+];
+
+// Returns a consistent static image based on product id
+const getStaticImage = (productId: string): string => {
+  let hash = 0;
+  for (let i = 0; i < productId.length; i++) {
+    hash = (hash + productId.charCodeAt(i)) % STATIC_IMAGES.length;
+  }
+  return STATIC_IMAGES[hash];
+};
 
 // Helper function to save to localStorage
 const saveToLocalStorage = (key: string, data: any) => {
@@ -588,62 +613,30 @@ export default function ShopMain() {
     router.push(`/shop/${productId}`);
   };
 
-  // In ShopMain component - update the transformedProducts mapping:
-  // In ShopMain component - make sure this transformation is correct
+  // Transform products — static Unsplash images used instead of API images
   const transformedProducts = displayedProducts.map((product) => {
-    // Debug the raw product data first
-    console.log("🔄 Transforming product:", {
-      name: product.name,
-      rawColors: product.colors,
-      rawSizes: product.sizes,
-      colorsFromDB: product.colors, // This is from database
-      sizesFromDB: product.sizes, // This is from database
-      colorsLength: product.colors?.length,
-      sizesLength: product.sizes?.length,
-      colorsType: typeof product.colors,
-      sizesType: typeof product.sizes,
-    });
-
-    // Get available colors and sizes from your collections
-    console.log("📊 Available data:", {
-      colorsCollection: colors.map((c) => c.name),
-      sizesCollection: sizes.map((s) => s.name),
-    });
-
-    // Get product colors and sizes
     const productColors = product.colors || [];
     const productSizes = product.sizes || [];
 
-    // Get color hex codes for display
     const productColorHexes = colors
       .filter((c) => productColors.includes(c.name))
       .map((c) => c.hexCode);
 
-    // Get color options for modal (array of {name, hex})
     const colorOptions = colors
       .filter((c) => productColors.includes(c.name))
       .map((c) => ({ name: c.name, hex: c.hexCode }));
-
-    console.log("🎨 Derived data:", {
-      colorOptions,
-      colorOptionsLength: colorOptions.length,
-      weightOptions: productSizes,
-      productColorHexes,
-    });
 
     return {
       id: product._id,
       name: product.name,
       price: product.price,
-      image: product.images?.[0]
-        ? `${API_BASE_URL.replace("/api/v1", "")}${product.images[0]}`
-        : PLACEHOLDER,
+      // Static Unsplash image assigned consistently per product
+      image: getStaticImage(product._id),
       colors: productColorHexes.slice(0, 3),
       moreColors:
         productColorHexes.length > 3 ? productColorHexes.length - 3 : 0,
       showWishlist: true,
       description: product.description || "",
-      // CRITICAL: These must be set for the modal
       colorOptions: colorOptions,
       weightOptions: productSizes,
       badge:
@@ -677,11 +670,6 @@ export default function ShopMain() {
     count: allProducts.filter((p) => (p.sizes || []).includes(size.name))
       .length,
   }));
-
-  console.log("📊 Filter counts:", {
-    colors: colorCounts.map((c) => `${c.name}: ${c.count}`),
-    sizes: sizeCounts.map((s) => `${s.name}: ${s.count}`),
-  });
 
   const hasActiveFilters =
     filters.selectedBrands.length > 0 ||
